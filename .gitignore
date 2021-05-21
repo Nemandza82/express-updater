@@ -1,0 +1,9 @@
+obj
+.vs
+*.opendb
+*.db
+*.user
+*.aps
+/bin
+/expserver/node_modules
+/expserver/appwin

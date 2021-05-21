@@ -1,0 +1,165 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="bootstrap/bootstrap.min.css">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#" id="headertext"></a>
+    </nav>
+    <div class="modal fade" id="eulaModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">License agreement</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="licenseText">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" id="eulaDecline">Decline</button>
+                    <button type="button" class="btn btn-primary" id="eulaAccept">Accept</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="progress" style="height: 20px;">
+        <div id="progressbar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+
+    <div class="progress" style="height: 1px;">
+        <div id="progressbarFile" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+
+    <div class="alert alert-primary" role="alert" id="alert">
+    </div>
+
+    <div>
+        <button type="button" class="btn btn-primary btn-lg btn-block collapse" id="runbutton" onclick="app.runapp();">Run un-updated version</button>
+    </div>
+
+    <script src="jquery/jquery-3.3.1.min.js"></script>
+    <script src="bootstrap/popper.min.js"></script>
+    <script src="bootstrap/bootstrap.min.js"></script>
+    <script src="showdown.min.js"></script>
+
+      <script>
+          var _totalItems = 0;
+
+          $(function ()
+          {
+              $("#eulaAccept").on("click", function () {
+                  $('#eulaModal').modal('hide');
+                  app.eulaAccepted();
+              });
+
+              $("#eulaDecline").on("click", function () {
+                  $('#eulaModal').modal('hide');
+                  app.eulaDeclined();
+              });
+
+              app.started();
+          });
+
+          function showEula(text)
+          {
+              //let text = $("#eulapre").html();
+              let converter = new showdown.Converter();
+              let hhh = converter.makeHtml(text);
+
+              $('#licenseText').html(hhh);
+              $('#eulaModal').modal('show');
+          }
+
+          function updateProgress(id, size, totalSize)
+          {
+              const progress = Math.floor((100 * id / _totalItems)) + "%";
+              const progressFile = Math.floor((100 * size / totalSize)) + "%";
+
+              $('#progressbar').css("width", progress);
+
+              $('#progressbarFile').hide();
+              $('#progressbarFile').css("width", progressFile);
+              $('#progressbarFile').show();
+          }
+
+          function showStatus(txt)
+          {
+              $('#alert').html(txt);
+          }
+
+          function showErrStatus(txt)
+          {
+              $('#alert').removeClass("alert-primary");
+              $('#alert').addClass("alert-danger");
+              $('#alert').html(txt);
+          }
+
+          // Methods called from cpp
+
+          function setTotalItems(nItems)
+          {
+              _totalItems = nItems;
+          }
+
+          function setTitle(title)
+          {
+              document.title = title;
+          }
+
+          function setHeaderText(txt)
+          {
+              $('#headertext').html(txt);
+          }
+
+          function onSameHash(id, name, hash)
+          {
+              updateProgress(id, 0, 1);
+              showStatus("[" + id + "/" + _totalItems + "] " + name + " -> OK \n");
+          }
+
+          function onStartDownload(id, name)
+          {
+              updateProgress(id, 0, 1);
+              showStatus("[" + id + "/" + _totalItems + "] " + name + " -> Donwloading\n");
+          }
+
+          function onDownloadProgress(id, size, totalSize)
+          {
+              updateProgress(id, size, totalSize);
+          }
+
+          function onFileDownloaded(id, name, length)
+          {
+              updateProgress(id, 1, 1);
+              showStatus("[" + id + "/" + _totalItems + "] " + name + " -> Donwloaded " + length + " bytes\n");
+          }
+
+          function onError(err, binaryExists)
+          {
+              showErrStatus(err);
+
+              if (binaryExists)
+              {
+                  $('#runbutton').show();
+                  setHeaderText("Update failed");
+              }
+              else
+              {
+                  setHeaderText("Update failed - Try again later");
+              }
+          }
+
+          function onCompleted()
+          {
+              showStatus("Completed");
+          }
+      </script>
+  </body>
+</html>
