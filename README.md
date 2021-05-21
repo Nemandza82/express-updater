@@ -36,6 +36,10 @@ binary name and command line parameters, and so on.
 Windows folder should be named "appwin" (although that can be changed).
  * Running [expressapp.js](https://bitbucket.org/Nemandza/expressupdater/src/master/expserver/expressapp.js) with node (node expressapp.js) should start the web service for serving your app. 
 
-# License
+## Maintainers
+
+[Nemandza82](https://github.com/Nemandza82)
+
+## License
 
 ExpressUpdater is licensed under [MIT license](LICENSE.md).
